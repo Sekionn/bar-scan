@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 public class BarScanApplication {
 
-@RequestMapping("/")
+        @RequestMapping("/")
         public String home() {
                 return "Hello World!";
         }
