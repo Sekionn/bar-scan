@@ -41,8 +41,10 @@ public class ProductController {
     LinkedList<Product> createProducts(@RequestBody MultipleProductsDTO productsDto){
         LinkedList<Product> products = new LinkedList<Product>();
 
-        for (ProductCreationDTO product : productsDto.products) {
-            products.add(product.createProduct());
+        for (ProductCreationDTO productDto : productsDto.products) {
+            Product product = productDto.createProduct();
+            productService.createProduct(product);
+            products.add(product);
         }
 
         return products;
