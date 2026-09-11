@@ -18,7 +18,6 @@ public record ProductCreatedEventDTO(
         @Min(0)
         int shelfOfOrigin,
 
-        @Min(0)
         int amountCounted
 ) {
 }

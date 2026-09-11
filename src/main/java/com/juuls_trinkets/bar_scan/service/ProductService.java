@@ -43,7 +43,6 @@ public class ProductService {
                 event.shelfOfOrigin(),
                 event.amountCounted()
         );
-        productRepository.create(product);
-        return new ProductResponseDTO(product);
+        return new ProductResponseDTO(productRepository.addToCountByCompanyAndBarcode(product));
     }
 }
