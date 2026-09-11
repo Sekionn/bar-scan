@@ -58,13 +58,20 @@ PRODUCT_CREATED_QUEUE=bar-scan.product-created
 PRODUCT_CREATED_ROUTING_KEY=product.created
 ```
 
-Local CORS settings:
+Allowed browser/WebView origins are configured statically in the backend `CorsConfig` class. Native mobile HTTP clients normally do not enforce browser CORS, but WebViews and web builds do.
 
-```properties
-APP_CORS_ALLOWED_ORIGIN_PATTERNS=http://localhost:58159,http://localhost:56754,http://localhost:[*],https://localhost:[*],http://127.0.0.1:[*],https://127.0.0.1:[*],http://10.0.2.2:[*],https://10.0.2.2:[*],capacitor://localhost,ionic://localhost
-```
+Current static local origins:
 
-For browser/WebView-based mobile development, add the mobile app's exact origin to `APP_CORS_ALLOWED_ORIGIN_PATTERNS` if it differs from the defaults. Native mobile HTTP clients normally do not enforce browser CORS, but WebViews and web builds do.
+- `http://localhost:[*]`
+- `https://localhost:[*]`
+- `http://127.0.0.1:[*]`
+- `https://127.0.0.1:[*]`
+- `http://10.0.2.2:[*]`
+- `https://10.0.2.2:[*]`
+- `http://192.168.1.20:[*]`
+- `https://192.168.1.20:[*]`
+- `capacitor://localhost`
+- `ionic://localhost`
 
 The backend Docker Compose service sets equivalent environment variables internally, except it uses Docker service hostnames like `mysql` and `rabbitmq` instead of `localhost`.
 

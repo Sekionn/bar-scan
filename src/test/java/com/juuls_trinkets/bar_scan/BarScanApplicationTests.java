@@ -17,8 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 	"spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.flyway.enabled=false",
 	"spring.rabbitmq.listener.simple.auto-startup=false",
-	"app.bootstrap-admin.enabled=false",
-	"app.cors.allowed-origin-patterns=http://localhost:[*]"
+	"app.bootstrap-admin.enabled=false"
 })
 @AutoConfigureMockMvc
 class BarScanApplicationTests {
