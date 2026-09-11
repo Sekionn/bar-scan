@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bar-scan-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/bar_scan?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: bar_scan
+      DB_PASSWORD: bar_scan
+      JWT_SECRET: local-compose-secret-must-be-at-least-32-bytes-long
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: bar_scan
+      RABBITMQ_PASSWORD: bar_scan
+      PRODUCT_CREATED_EXCHANGE: bar-scan.products
+      PRODUCT_CREATED_QUEUE: bar-scan.product-created
+      PRODUCT_CREATED_ROUTING_KEY: product.created
+      APP_BOOTSTRAP_ADMIN_ENABLED: "true"
+      APP_BOOTSTRAP_ADMIN_COMPANY_ID: 00000000-0000-0000-0000-000000000001
+      APP_BOOTSTRAP_ADMIN_USER_ID: 00000000-0000-0000-0000-000000000002
+      APP_BOOTSTRAP_ADMIN_USERNAME: admin
+      APP_BOOTSTRAP_ADMIN_PASSWORD: "2"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    container_name: bar-scan-mysql
+    environment:
+      MYSQL_DATABASE: bar_scan
+      MYSQL_USER: bar_scan
+      MYSQL_PASSWORD: bar_scan
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: bar-scan-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: bar_scan
+      RABBITMQ_DEFAULT_PASS: bar_scan
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  rabbitmq-data:
