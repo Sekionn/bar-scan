@@ -18,6 +18,8 @@ public record ProductCreatedEventDTO(
         @Min(0)
         int shelfOfOrigin,
 
+        String storeSegment,
+
         int amountCounted
 ) {
 }

@@ -14,9 +14,11 @@ public class ProductMapper implements RowMapper<Product> {
     public Product mapRow(ResultSet result, int rowNumber) throws SQLException {
         return new Product(
                 UUID.fromString(result.getString("company_id")),
+                UUID.fromString(result.getString("shop_id")),
                 UUID.fromString(result.getString("product_id")),
                 result.getString("barcode"),
                 result.getInt("shelf_of_origin"),
+                result.getString("store_segment"),
                 result.getInt("amount_counted"),
                 result.getTimestamp("counted_date").toLocalDateTime()
         );

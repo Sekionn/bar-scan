@@ -28,6 +28,7 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim("userId", user.getId().toString())
                 .claim("companyId", user.getCompanyId().toString())
+                .claim("shopId", user.getShopId() == null ? null : user.getShopId().toString())
                 .claim("role", user.getAuthorities().iterator().next().getAuthority())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))

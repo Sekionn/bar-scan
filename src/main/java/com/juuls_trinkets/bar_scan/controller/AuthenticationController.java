@@ -20,7 +20,7 @@ import com.juuls_trinkets.bar_scan.dto.LoginRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.UserResponseDTO;
 import com.juuls_trinkets.bar_scan.security.CustomUserDetails;
 import com.juuls_trinkets.bar_scan.security.JwtUtil;
-import com.juuls_trinkets.bar_scan.service.UserService;
+import com.juuls_trinkets.bar_scan.service.user.UserApplicationService;
 
 import jakarta.validation.Valid;
 
@@ -30,12 +30,12 @@ public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserService userService;
+    private final UserApplicationService userService;
 
     public AuthenticationController(
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
-            UserService userService
+            UserApplicationService userService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -47,7 +47,7 @@ public class AuthenticationController {
             @AuthenticationPrincipal CustomUserDetails admin,
             @Valid @RequestBody CreateUserRequestDTO request
     ) {
-        return userService.registerUser(request, admin.getCompanyId());
+        return userService.registerUser(request, admin);
     }
 
     @PostMapping("/login")

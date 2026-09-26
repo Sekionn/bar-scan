@@ -8,13 +8,19 @@ public class AppUser {
     private final String username;
     private final String passwordHash;
     private final UUID companyId;
+    private final UUID shopId;
     private final String role;
 
     public AppUser(UUID id, String username, String passwordHash, UUID companyId, String role) {
+        this(id, username, passwordHash, companyId, null, role);
+    }
+
+    public AppUser(UUID id, String username, String passwordHash, UUID companyId, UUID shopId, String role) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.companyId = companyId;
+        this.shopId = shopId;
         this.role = role;
     }
 
@@ -32,6 +38,10 @@ public class AppUser {
 
     public UUID getCompanyId() {
         return companyId;
+    }
+
+    public UUID getShopId() {
+        return shopId;
     }
 
     public String getRole() {

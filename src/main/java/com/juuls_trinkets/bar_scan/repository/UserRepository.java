@@ -14,4 +14,6 @@ public interface UserRepository {
     long countByCompanyId(UUID companyId);
 
     AppUser create(AppUser user);
+
+    AppUser updatePassword(UUID userId, String passwordHash);
 }

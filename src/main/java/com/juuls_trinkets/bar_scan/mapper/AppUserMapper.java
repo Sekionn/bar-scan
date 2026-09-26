@@ -17,6 +17,7 @@ public class AppUserMapper implements RowMapper<AppUser> {
                 result.getString("username"),
                 result.getString("password_hash"),
                 UUID.fromString(result.getString("company_id")),
+                result.getString("shop_id") == null ? null : UUID.fromString(result.getString("shop_id")),
                 result.getString("role")
         );
     }

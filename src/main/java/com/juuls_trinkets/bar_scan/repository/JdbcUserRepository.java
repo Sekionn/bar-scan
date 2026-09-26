@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.juuls_trinkets.bar_scan.exception.ResourceNotFoundException;
 import com.juuls_trinkets.bar_scan.mapper.AppUserMapper;
 import com.juuls_trinkets.bar_scan.model.AppUser;
 
@@ -53,16 +55,32 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public AppUser create(AppUser user) {
         String sql = """
-                insert into users(id, username, password_hash, company_id, role)
-                values(:id, :username, :passwordHash, :companyId, :role)
+                insert into users(id, username, password_hash, company_id, shop_id, role)
+                values(:id, :username, :passwordHash, :companyId, :shopId, :role)
                 """;
-        template.update(sql, Map.of(
-                "id", user.getId().toString(),
-                "username", user.getUsername(),
-                "passwordHash", user.getPasswordHash(),
-                "companyId", user.getCompanyId().toString(),
-                "role", user.getRole()
-        ));
+        template.update(sql, new MapSqlParameterSource()
+                .addValue("id", user.getId().toString())
+                .addValue("username", user.getUsername())
+                .addValue("passwordHash", user.getPasswordHash())
+                .addValue("companyId", user.getCompanyId().toString())
+                .addValue("shopId", user.getShopId() == null ? null : user.getShopId().toString())
+                .addValue("role", user.getRole()));
         return user;
+    }
+
+    @Override
+    public AppUser updatePassword(UUID userId, String passwordHash) {
+        template.update(
+                """
+                update users
+                set password_hash = :passwordHash
+                where id = :id
+                """,
+                Map.of(
+                        "id", userId.toString(),
+                        "passwordHash", passwordHash
+                )
+        );
+        return findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

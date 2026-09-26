@@ -26,6 +26,10 @@ public class CustomUserDetails implements UserDetails {
         return user.getCompanyId();
     }
 
+    public UUID getShopId() {
+        return user.getShopId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(user.getRole()));

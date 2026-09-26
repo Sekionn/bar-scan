@@ -30,7 +30,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/register").hasRole("ADMIN")
+                        .requestMatchers("/signup/**").permitAll()
+                        .requestMatchers("/payments/dev/**").permitAll()
+                        .requestMatchers("/super/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/shops/**").hasAnyRole("MANAGER", "SUPER_ADMIN")
+                        .requestMatchers("/auth/register").hasAnyRole("ADMIN", "MANAGER", "SUPER_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

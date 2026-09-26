@@ -33,4 +33,21 @@ public class JdbcCompanyRepository implements CompanyRepository {
         );
         return companies.stream().findFirst();
     }
+
+    @Override
+    public Company create(Company company) {
+        template.update(
+                """
+                insert into companies(id, name, allowed_user_count, location_name)
+                values(:id, :name, :allowedUserCount, :locationName)
+                """,
+                Map.of(
+                        "id", company.getId().toString(),
+                        "name", company.getName(),
+                        "allowedUserCount", company.getAllowedUserCount(),
+                        "locationName", company.getLocationName()
+                )
+        );
+        return company;
+    }
 }

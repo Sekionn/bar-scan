@@ -4,16 +4,16 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import com.juuls_trinkets.bar_scan.dto.ProductCreatedEventDTO;
-import com.juuls_trinkets.bar_scan.service.ProductService;
+import com.juuls_trinkets.bar_scan.service.product.ProductApplicationService;
 
 import jakarta.validation.Valid;
 
 @Component
 public class ProductCreatedMessageListener {
 
-    private final ProductService productService;
+    private final ProductApplicationService productService;
 
-    public ProductCreatedMessageListener(ProductService productService) {
+    public ProductCreatedMessageListener(ProductApplicationService productService) {
         this.productService = productService;
     }
 

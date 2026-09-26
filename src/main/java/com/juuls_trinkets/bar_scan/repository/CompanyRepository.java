@@ -8,4 +8,6 @@ import com.juuls_trinkets.bar_scan.model.Company;
 public interface CompanyRepository {
 
     Optional<Company> findById(UUID id);
+
+    Company create(Company company);
 }

@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleBadRequest(BadRequestException ex) {
+        return Map.of("message", ex.getMessage());
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleDuplicate(DuplicateResourceException ex) {
