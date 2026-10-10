@@ -30,6 +30,10 @@ public class CustomUserDetails implements UserDetails {
         return user.getShopId();
     }
 
+    public String getRole() {
+        return user.getRole();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(user.getRole()));

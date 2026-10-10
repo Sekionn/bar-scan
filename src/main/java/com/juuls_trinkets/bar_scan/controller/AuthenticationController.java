@@ -24,8 +24,10 @@ import com.juuls_trinkets.bar_scan.dto.CreateUserRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.LoginRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.SetUserPasswordRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.UserResponseDTO;
+import com.juuls_trinkets.bar_scan.exception.ForbiddenException;
 import com.juuls_trinkets.bar_scan.security.CustomUserDetails;
 import com.juuls_trinkets.bar_scan.security.JwtUtil;
+import com.juuls_trinkets.bar_scan.service.authorization.UserAccessPolicy;
 import com.juuls_trinkets.bar_scan.service.user.UserApplicationService;
 
 import jakarta.validation.Valid;
@@ -36,15 +38,18 @@ public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final UserAccessPolicy userAccessPolicy;
     private final UserApplicationService userService;
 
     public AuthenticationController(
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
+            UserAccessPolicy userAccessPolicy,
             UserApplicationService userService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.userAccessPolicy = userAccessPolicy;
         this.userService = userService;
     }
 
@@ -83,7 +88,14 @@ public class AuthenticationController {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
-        return new AuthTokenResponseDTO(jwtUtil.generateToken((UserDetails) auth.getPrincipal()));
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+
+        if (LoginRequestDTO.CLIENT_TYPE_WEB.equals(request.getClientType())
+                && !userAccessPolicy.canUseWebData(user.getRole())) {
+            throw new ForbiddenException("This user can only log in to the mobile app.");
+        }
+
+        return new AuthTokenResponseDTO(jwtUtil.generateToken((UserDetails) user));
     }
 
     @PostMapping("/refresh")

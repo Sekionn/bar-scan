@@ -90,7 +90,7 @@ public class UserAccessPolicy {
         return new UserRoleOptionDTO(value, roleLabel(role), requiresShop(role));
     }
 
-    private boolean canUseWebData(String role) {
+    public boolean canUseWebData(String role) {
         return ROLE_DATA_ANALYST.equals(role)
                 || ROLE_ADMIN.equals(role)
                 || ROLE_MANAGER.equals(role)

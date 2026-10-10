@@ -22,4 +22,11 @@ class UserAccessPolicyTests {
         assertThat(capabilities.canAssignShopAndRole()).isFalse();
         assertThat(capabilities.canAccessSuperUserPassword()).isFalse();
     }
+
+    @Test
+    void mobileUserCannotUseWebData() {
+        AuthCapabilitiesDTO capabilities = userAccessPolicy.capabilities("ROLE_USER");
+
+        assertThat(capabilities.canUseWebData()).isFalse();
+    }
 }
