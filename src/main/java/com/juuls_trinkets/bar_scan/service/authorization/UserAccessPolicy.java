@@ -77,7 +77,7 @@ public class UserAccessPolicy {
     }
 
     public boolean requiresShop(String role) {
-        return ROLE_USER.equals(role) || ROLE_ADMIN.equals(role);
+        return ROLE_USER.equals(role);
     }
 
     private UserRoleOptionDTO roleOption(String value, String role) {

@@ -133,7 +133,7 @@ public class ContactSignupService implements ContactSignupApplicationService {
                 adminEmail,
                 passwordHash,
                 company.getId(),
-                shop.getId(),
+                null,
                 "ROLE_ADMIN"
         ));
 

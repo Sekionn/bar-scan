@@ -54,15 +54,6 @@ public class UserService implements UserApplicationService {
                     .map(visibleUser -> new UserResponseDTO(visibleUser, userAccessPolicy))
                     .toList();
         }
-        if ("ROLE_ADMIN".equals(role)) {
-            UUID shopId = user.getShopId();
-            if (shopId == null) {
-                throw new ResourceNotFoundException("Admin user is not assigned to a shop");
-            }
-            return userRepository.findAllByShopId(shopId).stream()
-                    .map(visibleUser -> new UserResponseDTO(visibleUser, userAccessPolicy))
-                    .toList();
-        }
         throw new BadRequestException("This user cannot manage users");
     }
 
@@ -76,11 +67,7 @@ public class UserService implements UserApplicationService {
         UUID targetShopId = creator.getShopId();
         String targetRole = "ROLE_USER";
 
-        if ("ROLE_ADMIN".equals(creatorRole)) {
-            if (targetShopId == null) {
-                throw new ResourceNotFoundException("Admin user is not assigned to a shop");
-            }
-        } else if (userAccessPolicy.canAssignShopAndRole(creatorRole)) {
+        if (userAccessPolicy.canAssignShopAndRole(creatorRole)) {
             targetRole = userAccessPolicy.normalizeAssignableRole(request.getRole());
             targetShopId = request.getShopId();
         }
@@ -147,17 +134,6 @@ public class UserService implements UserApplicationService {
         String actorRole = actor.getAuthorities().iterator().next().getAuthority();
         if (userAccessPolicy.canAssignShopAndRole(actorRole)) {
             if (!actor.getCompanyId().equals(targetUser.getCompanyId())) {
-                throw new ResourceNotFoundException("User not found");
-            }
-            return targetUser;
-        }
-
-        if ("ROLE_ADMIN".equals(actorRole)) {
-            UUID actorShopId = actor.getShopId();
-            if (actorShopId == null) {
-                throw new ResourceNotFoundException("Admin user is not assigned to a shop");
-            }
-            if (!actorShopId.equals(targetUser.getShopId())) {
                 throw new ResourceNotFoundException("User not found");
             }
             return targetUser;

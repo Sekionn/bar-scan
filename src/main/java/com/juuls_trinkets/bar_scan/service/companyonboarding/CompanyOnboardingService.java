@@ -81,7 +81,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                 adminEmail,
                 passwordEncoder.encode(request.getAdminPassword()),
                 company.getId(),
-                shop.getId(),
+                null,
                 "ROLE_ADMIN"
         ));
 
@@ -130,7 +130,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                 signup.adminEmail(),
                 signup.adminPasswordHash(),
                 company.getId(),
-                shop.getId(),
+                null,
                 "ROLE_ADMIN"
         ));
 
