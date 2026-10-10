@@ -1,16 +1,13 @@
 package com.juuls_trinkets.bar_scan.service;
 
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.juuls_trinkets.bar_scan.dto.ContactSignupRequestDTO;
+import com.juuls_trinkets.bar_scan.dto.SignupNotificationEventDTO;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -38,20 +35,20 @@ public class SignupNotificationService {
         this.toEmail = toEmail;
     }
 
-    public void notifyContactSignup(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
-        sendSmtpNotification(signupId, request, adminEmail);
+    public void sendSignupNotification(SignupNotificationEventDTO event) {
+        sendSmtpNotification(event);
 
         logger.info(
                 "Contact signup requested: company={}, location={}, allowedUserCount={}, adminEmail={}, message={}",
-                request.getCompanyName().trim(),
-                request.getLocationName().trim(),
-                request.getAllowedUserCount(),
-                adminEmail,
-                normalizeMessage(request.getMessage())
+                event.companyName(),
+                event.locationName(),
+                event.allowedUserCount(),
+                event.adminEmail(),
+                normalizeMessage(event.message())
         );
     }
 
-    private void sendSmtpNotification(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
+    private void sendSmtpNotification(SignupNotificationEventDTO event) {
         JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         String recipientEmail = resolvedRecipientEmail();
 
@@ -67,11 +64,11 @@ public class SignupNotificationService {
             helper.setTo(recipientEmail);
             helper.setSubject("New Bar'scan signup request");
             helper.setText(
-                    buildPlainTextBody(signupId, request, adminEmail),
-                    buildHtmlBody(signupId, request, adminEmail)
+                    buildPlainTextBody(event),
+                    buildHtmlBody(event)
             );
             mailSender.send(message);
-        } catch (MailException | MessagingException ex) {
+        } catch (MessagingException | RuntimeException ex) {
             logger.warn("Signup notification email could not be sent through SMTP", ex);
         }
     }
@@ -83,7 +80,7 @@ public class SignupNotificationService {
         return superAdminEmail;
     }
 
-    private static String buildPlainTextBody(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
+    private static String buildPlainTextBody(SignupNotificationEventDTO event) {
         return """
                 New Bar'scan company signup request
 
@@ -94,16 +91,16 @@ public class SignupNotificationService {
                 Admin email: %s
                 Message: %s
                 """.formatted(
-                signupId,
-                request.getCompanyName().trim(),
-                request.getLocationName().trim(),
-                request.getAllowedUserCount(),
-                adminEmail,
-                normalizeMessage(request.getMessage())
+                event.signupId(),
+                event.companyName(),
+                event.locationName(),
+                event.allowedUserCount(),
+                event.adminEmail(),
+                normalizeMessage(event.message())
         );
     }
 
-    private static String buildHtmlBody(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
+    private static String buildHtmlBody(SignupNotificationEventDTO event) {
         return """
                 <h2>New Bar&#39;scan company signup request</h2>
                 <dl>
@@ -115,12 +112,12 @@ public class SignupNotificationService {
                   <dt>Message</dt><dd>%s</dd>
                 </dl>
                 """.formatted(
-                escapeHtml(signupId.toString()),
-                escapeHtml(request.getCompanyName().trim()),
-                escapeHtml(request.getLocationName().trim()),
-                request.getAllowedUserCount(),
-                escapeHtml(adminEmail),
-                escapeHtml(normalizeMessage(request.getMessage()))
+                escapeHtml(event.signupId().toString()),
+                escapeHtml(event.companyName()),
+                escapeHtml(event.locationName()),
+                event.allowedUserCount(),
+                escapeHtml(event.adminEmail()),
+                escapeHtml(normalizeMessage(event.message()))
         );
     }
 

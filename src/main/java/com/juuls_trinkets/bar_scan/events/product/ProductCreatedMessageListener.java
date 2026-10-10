@@ -3,6 +3,7 @@ package com.juuls_trinkets.bar_scan.events.product;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import com.juuls_trinkets.bar_scan.config.RabbitMqTopology;
 import com.juuls_trinkets.bar_scan.dto.ProductCreatedEventDTO;
 import com.juuls_trinkets.bar_scan.dto.ProductResponseDTO;
 import com.juuls_trinkets.bar_scan.service.product.ProductApplicationService;
@@ -24,7 +25,7 @@ public class ProductCreatedMessageListener {
         this.queueStatusService = queueStatusService;
     }
 
-    @RabbitListener(queues = "${app.messaging.product-created-queue}")
+    @RabbitListener(queues = RabbitMqTopology.PRODUCT_CREATED_QUEUE)
     public void handle(@Valid ProductCreatedEventDTO event) {
         if (queueStatusService.isProcessed(event.messageId())) {
             return;

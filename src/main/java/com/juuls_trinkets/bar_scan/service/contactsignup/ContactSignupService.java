@@ -20,7 +20,7 @@ import com.juuls_trinkets.bar_scan.model.Shop;
 import com.juuls_trinkets.bar_scan.repository.CompanyRepository;
 import com.juuls_trinkets.bar_scan.repository.ShopRepository;
 import com.juuls_trinkets.bar_scan.repository.UserRepository;
-import com.juuls_trinkets.bar_scan.service.SignupNotificationService;
+import com.juuls_trinkets.bar_scan.service.SignupNotificationPublisher;
 
 @Service
 public class ContactSignupService implements ContactSignupApplicationService {
@@ -34,7 +34,7 @@ public class ContactSignupService implements ContactSignupApplicationService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final SignupNotificationService signupNotificationService;
+    private final SignupNotificationPublisher signupNotificationPublisher;
 
     public ContactSignupService(
             NamedParameterJdbcTemplate template,
@@ -42,14 +42,14 @@ public class ContactSignupService implements ContactSignupApplicationService {
             ShopRepository shopRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            SignupNotificationService signupNotificationService
+            SignupNotificationPublisher signupNotificationPublisher
     ) {
         this.template = template;
         this.companyRepository = companyRepository;
         this.shopRepository = shopRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.signupNotificationService = signupNotificationService;
+        this.signupNotificationPublisher = signupNotificationPublisher;
     }
 
     @Transactional
@@ -151,7 +151,7 @@ public class ContactSignupService implements ContactSignupApplicationService {
                 )
         );
 
-        signupNotificationService.notifyContactSignup(signupId, request, adminEmail);
+        signupNotificationPublisher.publishAfterCommit(signupId, request, adminEmail);
 
         return new ContactSignupResponseDTO(
                 signupId,

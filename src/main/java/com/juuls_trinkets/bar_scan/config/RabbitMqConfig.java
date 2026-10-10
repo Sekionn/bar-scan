@@ -16,71 +16,78 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMqConfig {
 
     @Bean
-    public DirectExchange productCreatedExchange(
-            @Value("${app.messaging.product-created-exchange}") String exchangeName
-    ) {
-        return new DirectExchange(exchangeName, true, false);
+    public DirectExchange productCreatedExchange() {
+        return new DirectExchange(RabbitMqTopology.PRODUCT_CREATED_EXCHANGE, true, false);
     }
 
     @Bean
-    public Queue productCreatedQueue(
-            @Value("${app.messaging.product-created-queue}") String queueName
-    ) {
-        return new Queue(queueName, true);
+    public Queue productCreatedQueue() {
+        return new Queue(RabbitMqTopology.PRODUCT_CREATED_QUEUE, true);
     }
 
     @Bean
     public Binding productCreatedBinding(
             Queue productCreatedQueue,
-            DirectExchange productCreatedExchange,
-            @Value("${app.messaging.product-created-routing-key}") String routingKey
+            DirectExchange productCreatedExchange
     ) {
         return BindingBuilder.bind(productCreatedQueue)
                 .to(productCreatedExchange)
-                .with(routingKey);
+                .with(RabbitMqTopology.PRODUCT_CREATED_ROUTING_KEY);
     }
 
     @Bean
-    public DirectExchange syncBatchExchange(
-            @Value("${app.messaging.sync-batch-exchange}") String exchangeName
-    ) {
-        return new DirectExchange(exchangeName, true, false);
+    public DirectExchange syncBatchExchange() {
+        return new DirectExchange(RabbitMqTopology.SYNC_BATCH_EXCHANGE, true, false);
     }
 
     @Bean
-    public Queue syncBatchStartedQueue(
-            @Value("${app.messaging.sync-batch-started-queue}") String queueName
-    ) {
-        return new Queue(queueName, true);
+    public Queue syncBatchStartedQueue() {
+        return new Queue(RabbitMqTopology.SYNC_BATCH_STARTED_QUEUE, true);
     }
 
     @Bean
-    public Queue syncBatchPublishCompletedQueue(
-            @Value("${app.messaging.sync-batch-publish-completed-queue}") String queueName
-    ) {
-        return new Queue(queueName, true);
+    public Queue syncBatchPublishCompletedQueue() {
+        return new Queue(RabbitMqTopology.SYNC_BATCH_PUBLISH_COMPLETED_QUEUE, true);
     }
 
     @Bean
     public Binding syncBatchStartedBinding(
             Queue syncBatchStartedQueue,
-            DirectExchange syncBatchExchange,
-            @Value("${app.messaging.sync-batch-started-routing-key}") String routingKey
+            DirectExchange syncBatchExchange
     ) {
         return BindingBuilder.bind(syncBatchStartedQueue)
                 .to(syncBatchExchange)
-                .with(routingKey);
+                .with(RabbitMqTopology.SYNC_BATCH_STARTED_ROUTING_KEY);
     }
 
     @Bean
     public Binding syncBatchPublishCompletedBinding(
             Queue syncBatchPublishCompletedQueue,
-            DirectExchange syncBatchExchange,
-            @Value("${app.messaging.sync-batch-publish-completed-routing-key}") String routingKey
+            DirectExchange syncBatchExchange
     ) {
         return BindingBuilder.bind(syncBatchPublishCompletedQueue)
                 .to(syncBatchExchange)
-                .with(routingKey);
+                .with(RabbitMqTopology.SYNC_BATCH_PUBLISH_COMPLETED_ROUTING_KEY);
+    }
+
+    @Bean
+    public DirectExchange signupNotificationExchange() {
+        return new DirectExchange(RabbitMqTopology.SIGNUP_NOTIFICATION_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue signupNotificationQueue() {
+        return new Queue(RabbitMqTopology.SIGNUP_NOTIFICATION_QUEUE, true);
+    }
+
+    @Bean
+    public Binding signupNotificationBinding(
+            Queue signupNotificationQueue,
+            DirectExchange signupNotificationExchange
+    ) {
+        return BindingBuilder.bind(signupNotificationQueue)
+                .to(signupNotificationExchange)
+                .with(RabbitMqTopology.SIGNUP_NOTIFICATION_ROUTING_KEY);
     }
 
     @Bean
