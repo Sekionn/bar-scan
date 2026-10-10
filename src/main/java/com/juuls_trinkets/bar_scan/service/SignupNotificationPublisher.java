@@ -28,7 +28,6 @@ public class SignupNotificationPublisher {
         SignupNotificationEventDTO event = new SignupNotificationEventDTO(
                 signupId,
                 request.getCompanyName().trim(),
-                request.getLocationName().trim(),
                 request.getAllowedUserCount(),
                 adminEmail,
                 normalizeMessage(request.getMessage())

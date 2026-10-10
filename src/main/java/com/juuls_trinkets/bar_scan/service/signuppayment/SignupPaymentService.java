@@ -85,17 +85,16 @@ public class SignupPaymentService implements SignupPaymentApplicationService {
                         :paymentSessionId
                     )
                     """,
-                    Map.of(
-                            "id", signupId.toString(),
-                            "companyName", request.getCompanyName().trim(),
-                            "locationName", request.getLocationName().trim(),
-                            "allowedUserCount", request.getAllowedUserCount(),
-                            "adminEmail", adminEmail,
-                            "adminPasswordHash", passwordEncoder.encode(request.getAdminPassword()),
-                            "paymentStatus", PAYMENT_PENDING,
-                            "onboardingStatus", ONBOARDING_PENDING,
-                            "paymentSessionId", paymentSessionId.toString()
-                    )
+                    new MapSqlParameterSource()
+                            .addValue("id", signupId.toString())
+                            .addValue("companyName", request.getCompanyName().trim())
+                            .addValue("locationName", null)
+                            .addValue("allowedUserCount", request.getAllowedUserCount())
+                            .addValue("adminEmail", adminEmail)
+                            .addValue("adminPasswordHash", passwordEncoder.encode(request.getAdminPassword()))
+                            .addValue("paymentStatus", PAYMENT_PENDING)
+                            .addValue("onboardingStatus", ONBOARDING_PENDING)
+                            .addValue("paymentSessionId", paymentSessionId.toString())
             );
         } catch (DuplicateKeyException ex) {
             throw new DuplicateResourceException("Admin email already exists");

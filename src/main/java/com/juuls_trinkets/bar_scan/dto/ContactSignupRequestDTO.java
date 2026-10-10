@@ -3,15 +3,11 @@ package com.juuls_trinkets.bar_scan.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public class ContactSignupRequestDTO {
 
     @NotBlank
     private String companyName;
-
-    @NotBlank
-    private String locationName;
 
     @Min(1)
     private int allowedUserCount;
@@ -28,14 +24,6 @@ public class ContactSignupRequestDTO {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
-    }
-
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
     }
 
     public int getAllowedUserCount() {

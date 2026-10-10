@@ -39,9 +39,8 @@ public class SignupNotificationService {
         sendSmtpNotification(event);
 
         logger.info(
-                "Contact signup requested: company={}, location={}, allowedUserCount={}, adminEmail={}, message={}",
+                "Contact signup requested: company={}, allowedUserCount={}, adminEmail={}, message={}",
                 event.companyName(),
-                event.locationName(),
                 event.allowedUserCount(),
                 event.adminEmail(),
                 normalizeMessage(event.message())
@@ -86,14 +85,12 @@ public class SignupNotificationService {
 
                 Signup ID: %s
                 Company: %s
-                Location: %s
                 Allowed users: %d
                 Admin email: %s
                 Message: %s
                 """.formatted(
                 event.signupId(),
                 event.companyName(),
-                event.locationName(),
                 event.allowedUserCount(),
                 event.adminEmail(),
                 normalizeMessage(event.message())
@@ -106,7 +103,6 @@ public class SignupNotificationService {
                 <dl>
                   <dt>Signup ID</dt><dd>%s</dd>
                   <dt>Company</dt><dd>%s</dd>
-                  <dt>Location</dt><dd>%s</dd>
                   <dt>Allowed users</dt><dd>%d</dd>
                   <dt>Admin email</dt><dd>%s</dd>
                   <dt>Message</dt><dd>%s</dd>
@@ -114,7 +110,6 @@ public class SignupNotificationService {
                 """.formatted(
                 escapeHtml(event.signupId().toString()),
                 escapeHtml(event.companyName()),
-                escapeHtml(event.locationName()),
                 event.allowedUserCount(),
                 escapeHtml(event.adminEmail()),
                 escapeHtml(normalizeMessage(event.message()))

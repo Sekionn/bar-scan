@@ -19,9 +19,7 @@ import com.juuls_trinkets.bar_scan.exception.DuplicateResourceException;
 import com.juuls_trinkets.bar_scan.exception.ResourceNotFoundException;
 import com.juuls_trinkets.bar_scan.model.AppUser;
 import com.juuls_trinkets.bar_scan.model.Company;
-import com.juuls_trinkets.bar_scan.model.Shop;
 import com.juuls_trinkets.bar_scan.repository.CompanyRepository;
-import com.juuls_trinkets.bar_scan.repository.ShopRepository;
 import com.juuls_trinkets.bar_scan.repository.UserRepository;
 import com.juuls_trinkets.bar_scan.service.authorization.UserAccessPolicy;
 
@@ -33,7 +31,6 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
 
     private final NamedParameterJdbcTemplate template;
     private final CompanyRepository companyRepository;
-    private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserAccessPolicy userAccessPolicy;
@@ -41,14 +38,12 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
     public CompanyOnboardingService(
             NamedParameterJdbcTemplate template,
             CompanyRepository companyRepository,
-            ShopRepository shopRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             UserAccessPolicy userAccessPolicy
     ) {
         this.template = template;
         this.companyRepository = companyRepository;
-        this.shopRepository = shopRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userAccessPolicy = userAccessPolicy;
@@ -67,13 +62,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                 UUID.randomUUID(),
                 request.getCompanyName().trim(),
                 request.getAllowedUserCount(),
-                request.getLocationName().trim()
-        ));
-
-        Shop shop = shopRepository.create(new Shop(
-                UUID.randomUUID(),
-                company.getId(),
-                request.getLocationName().trim()
+                request.getCompanyName().trim()
         ));
 
         AppUser admin = userRepository.create(new AppUser(
@@ -116,13 +105,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                 UUID.randomUUID(),
                 signup.companyName(),
                 signup.allowedUserCount(),
-                signup.locationName()
-        ));
-
-        Shop shop = shopRepository.create(new Shop(
-                UUID.randomUUID(),
-                company.getId(),
-                signup.locationName()
+                signup.companyName()
         ));
 
         AppUser admin = userRepository.create(new AppUser(
@@ -163,7 +146,6 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                 (result, rowNumber) -> new SignupRequestRow(
                         UUID.fromString(result.getString("id")),
                         result.getString("company_name"),
-                        result.getString("location_name"),
                         result.getInt("allowed_user_count"),
                         result.getString("admin_email"),
                         result.getString("admin_password_hash"),
@@ -185,7 +167,6 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
     private record SignupRequestRow(
             UUID id,
             String companyName,
-            String locationName,
             int allowedUserCount,
             String adminEmail,
             String adminPasswordHash,

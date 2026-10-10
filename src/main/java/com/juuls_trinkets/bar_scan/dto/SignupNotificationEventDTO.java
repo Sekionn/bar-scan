@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 public record SignupNotificationEventDTO(
         @NotNull UUID signupId,
         @NotBlank String companyName,
-        @NotBlank String locationName,
         @Min(1) int allowedUserCount,
         @Email @NotBlank String adminEmail,
         String message

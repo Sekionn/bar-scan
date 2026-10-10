@@ -16,9 +16,7 @@ import com.juuls_trinkets.bar_scan.dto.ContactSignupResponseDTO;
 import com.juuls_trinkets.bar_scan.exception.DuplicateResourceException;
 import com.juuls_trinkets.bar_scan.model.AppUser;
 import com.juuls_trinkets.bar_scan.model.Company;
-import com.juuls_trinkets.bar_scan.model.Shop;
 import com.juuls_trinkets.bar_scan.repository.CompanyRepository;
-import com.juuls_trinkets.bar_scan.repository.ShopRepository;
 import com.juuls_trinkets.bar_scan.repository.UserRepository;
 import com.juuls_trinkets.bar_scan.service.SignupNotificationPublisher;
 
@@ -31,7 +29,6 @@ public class ContactSignupService implements ContactSignupApplicationService {
 
     private final NamedParameterJdbcTemplate template;
     private final CompanyRepository companyRepository;
-    private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SignupNotificationPublisher signupNotificationPublisher;
@@ -39,14 +36,12 @@ public class ContactSignupService implements ContactSignupApplicationService {
     public ContactSignupService(
             NamedParameterJdbcTemplate template,
             CompanyRepository companyRepository,
-            ShopRepository shopRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             SignupNotificationPublisher signupNotificationPublisher
     ) {
         this.template = template;
         this.companyRepository = companyRepository;
-        this.shopRepository = shopRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.signupNotificationPublisher = signupNotificationPublisher;
@@ -100,7 +95,7 @@ public class ContactSignupService implements ContactSignupApplicationService {
                     new MapSqlParameterSource()
                             .addValue("id", signupId.toString())
                             .addValue("companyName", request.getCompanyName().trim())
-                            .addValue("locationName", request.getLocationName().trim())
+                            .addValue("locationName", null)
                             .addValue("allowedUserCount", request.getAllowedUserCount())
                             .addValue("adminEmail", adminEmail)
                             .addValue("adminPasswordHash", passwordHash)
@@ -119,13 +114,7 @@ public class ContactSignupService implements ContactSignupApplicationService {
                 UUID.randomUUID(),
                 request.getCompanyName().trim(),
                 request.getAllowedUserCount(),
-                request.getLocationName().trim()
-        ));
-
-        Shop shop = shopRepository.create(new Shop(
-                UUID.randomUUID(),
-                company.getId(),
-                request.getLocationName().trim()
+                request.getCompanyName().trim()
         ));
 
         AppUser admin = userRepository.create(new AppUser(

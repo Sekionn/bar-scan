@@ -10,9 +10,6 @@ public class OnboardCompanyRequestDTO {
     @NotBlank
     private String companyName;
 
-    @NotBlank
-    private String locationName;
-
     @Min(1)
     private int allowedUserCount;
 
@@ -30,14 +27,6 @@ public class OnboardCompanyRequestDTO {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
-    }
-
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
     }
 
     public int getAllowedUserCount() {
