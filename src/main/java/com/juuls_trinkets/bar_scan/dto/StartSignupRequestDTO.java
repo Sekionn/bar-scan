@@ -20,8 +20,8 @@ public class StartSignupRequestDTO {
     @NotBlank
     private String adminEmail;
 
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "Password is required.")
+    @Size(min = 8, message = "Password must be at least 8 characters.")
     private String adminPassword;
 
     public String getCompanyName() {

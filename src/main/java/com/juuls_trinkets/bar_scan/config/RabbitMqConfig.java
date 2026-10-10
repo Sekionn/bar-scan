@@ -41,6 +41,49 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public DirectExchange syncBatchExchange(
+            @Value("${app.messaging.sync-batch-exchange}") String exchangeName
+    ) {
+        return new DirectExchange(exchangeName, true, false);
+    }
+
+    @Bean
+    public Queue syncBatchStartedQueue(
+            @Value("${app.messaging.sync-batch-started-queue}") String queueName
+    ) {
+        return new Queue(queueName, true);
+    }
+
+    @Bean
+    public Queue syncBatchPublishCompletedQueue(
+            @Value("${app.messaging.sync-batch-publish-completed-queue}") String queueName
+    ) {
+        return new Queue(queueName, true);
+    }
+
+    @Bean
+    public Binding syncBatchStartedBinding(
+            Queue syncBatchStartedQueue,
+            DirectExchange syncBatchExchange,
+            @Value("${app.messaging.sync-batch-started-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(syncBatchStartedQueue)
+                .to(syncBatchExchange)
+                .with(routingKey);
+    }
+
+    @Bean
+    public Binding syncBatchPublishCompletedBinding(
+            Queue syncBatchPublishCompletedQueue,
+            DirectExchange syncBatchExchange,
+            @Value("${app.messaging.sync-batch-publish-completed-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(syncBatchPublishCompletedQueue)
+                .to(syncBatchExchange)
+                .with(routingKey);
+    }
+
+    @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }

@@ -23,6 +23,7 @@ import com.juuls_trinkets.bar_scan.model.Shop;
 import com.juuls_trinkets.bar_scan.repository.CompanyRepository;
 import com.juuls_trinkets.bar_scan.repository.ShopRepository;
 import com.juuls_trinkets.bar_scan.repository.UserRepository;
+import com.juuls_trinkets.bar_scan.service.authorization.UserAccessPolicy;
 
 @Service
 public class CompanyOnboardingService implements CompanyOnboardingApplicationService {
@@ -35,19 +36,22 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAccessPolicy userAccessPolicy;
 
     public CompanyOnboardingService(
             NamedParameterJdbcTemplate template,
             CompanyRepository companyRepository,
             ShopRepository shopRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserAccessPolicy userAccessPolicy
     ) {
         this.template = template;
         this.companyRepository = companyRepository;
         this.shopRepository = shopRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAccessPolicy = userAccessPolicy;
     }
 
     @Transactional
@@ -83,7 +87,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
 
         return new OnboardCompanyResponseDTO(
                 new CompanyResponseDTO(company),
-                new UserResponseDTO(admin)
+                new UserResponseDTO(admin, userAccessPolicy)
         );
     }
 
@@ -97,7 +101,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
                     .orElseThrow(() -> new ResourceNotFoundException("Onboarded company not found"));
             AppUser admin = userRepository.findById(signup.onboardedAdminUserId())
                     .orElseThrow(() -> new ResourceNotFoundException("Onboarded admin user not found"));
-            return new OnboardCompanyResponseDTO(new CompanyResponseDTO(company), new UserResponseDTO(admin));
+            return new OnboardCompanyResponseDTO(new CompanyResponseDTO(company), new UserResponseDTO(admin, userAccessPolicy));
         }
 
         if (!PAYMENT_PAID.equals(signup.paymentStatus())) {
@@ -148,7 +152,7 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
 
         return new OnboardCompanyResponseDTO(
                 new CompanyResponseDTO(company),
-                new UserResponseDTO(admin)
+                new UserResponseDTO(admin, userAccessPolicy)
         );
     }
 

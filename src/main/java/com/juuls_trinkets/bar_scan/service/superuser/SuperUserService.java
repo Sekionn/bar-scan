@@ -9,24 +9,31 @@ import org.springframework.transaction.annotation.Transactional;
 import com.juuls_trinkets.bar_scan.dto.SetUserPasswordRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.UserResponseDTO;
 import com.juuls_trinkets.bar_scan.repository.UserRepository;
+import com.juuls_trinkets.bar_scan.service.authorization.UserAccessPolicy;
 
 @Service
 public class SuperUserService implements SuperUserApplicationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAccessPolicy userAccessPolicy;
 
-    public SuperUserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public SuperUserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            UserAccessPolicy userAccessPolicy
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAccessPolicy = userAccessPolicy;
     }
 
     @Transactional
     @Override
     public UserResponseDTO setUserPassword(UUID userId, SetUserPasswordRequestDTO request) {
-        return new UserResponseDTO(userRepository.updatePassword(
-                userId,
-                passwordEncoder.encode(request.getPassword())
-        ));
+        return new UserResponseDTO(
+                userRepository.updatePassword(userId, passwordEncoder.encode(request.getPassword())),
+                userAccessPolicy
+        );
     }
 }

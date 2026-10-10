@@ -3,12 +3,13 @@ package com.juuls_trinkets.bar_scan.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.juuls_trinkets.bar_scan.model.Product;
+import com.juuls_trinkets.bar_scan.model.ScanningSessionProduct;
 
 public record ProductResponseDTO(
         UUID companyId,
+        UUID messageId,
         UUID shopId,
-        UUID productId,
+        UUID scanningSessionId,
         String barcode,
         int shelfOfOrigin,
         String storeSegment,
@@ -16,11 +17,12 @@ public record ProductResponseDTO(
         LocalDateTime countedDate,
         String countedQuarter
 ) {
-    public ProductResponseDTO(Product product) {
+    public ProductResponseDTO(UUID companyId, UUID shopId, ScanningSessionProduct product) {
         this(
-                product.getCompanyId(),
-                product.getShopId(),
-                product.getProductId(),
+                companyId,
+                product.getMessageId(),
+                shopId,
+                product.getScanningSessionId(),
                 product.getBarcode(),
                 product.getShelfOfOrigin(),
                 product.getStoreSegment(),

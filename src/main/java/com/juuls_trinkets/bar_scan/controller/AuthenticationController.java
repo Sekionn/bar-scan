@@ -1,6 +1,7 @@
 package com.juuls_trinkets.bar_scan.controller;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,12 +43,17 @@ public class AuthenticationController {
         this.userService = userService;
     }
 
+    @GetMapping("/users")
+    public List<UserResponseDTO> users(@AuthenticationPrincipal CustomUserDetails user) {
+        return userService.findVisibleUsers(user);
+    }
+
     @PostMapping("/register")
     public UserResponseDTO register(
-            @AuthenticationPrincipal CustomUserDetails admin,
+            @AuthenticationPrincipal CustomUserDetails creator,
             @Valid @RequestBody CreateUserRequestDTO request
     ) {
-        return userService.registerUser(request, admin);
+        return userService.registerUser(request, creator);
     }
 
     @PostMapping("/login")
@@ -56,6 +62,11 @@ public class AuthenticationController {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
         return new AuthTokenResponseDTO(jwtUtil.generateToken((UserDetails) auth.getPrincipal()));
+    }
+
+    @PostMapping("/refresh")
+    public AuthTokenResponseDTO refresh(@AuthenticationPrincipal CustomUserDetails user) {
+        return new AuthTokenResponseDTO(jwtUtil.generateToken(user));
     }
 
     @GetMapping("/me")

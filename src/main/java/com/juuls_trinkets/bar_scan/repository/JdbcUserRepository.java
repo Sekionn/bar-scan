@@ -43,10 +43,48 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Override
+    public List<AppUser> findAllByCompanyId(UUID companyId) {
+        return template.query(
+                """
+                select *
+                from users
+                where company_id = :companyId
+                order by shop_id is null, shop_id, username
+                """,
+                Map.of("companyId", companyId.toString()),
+                new AppUserMapper()
+        );
+    }
+
+    @Override
+    public List<AppUser> findAllByShopId(UUID shopId) {
+        return template.query(
+                """
+                select *
+                from users
+                where shop_id = :shopId
+                order by username
+                """,
+                Map.of("shopId", shopId.toString()),
+                new AppUserMapper()
+        );
+    }
+
+    @Override
     public long countByCompanyId(UUID companyId) {
         Long count = template.queryForObject(
                 "select count(*) from users where company_id = :companyId",
                 Map.of("companyId", companyId.toString()),
+                Long.class
+        );
+        return count == null ? 0 : count;
+    }
+
+    @Override
+    public long countByUsernamePrefix(String usernamePrefix) {
+        Long count = template.queryForObject(
+                "select count(*) from users where username like :usernamePattern",
+                Map.of("usernamePattern", usernamePrefix + "-user-%"),
                 Long.class
         );
         return count == null ? 0 : count;

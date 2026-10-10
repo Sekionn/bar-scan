@@ -8,9 +8,13 @@ import jakarta.validation.constraints.NotNull;
 
 public record ProductCreatedEventDTO(
         @NotNull
-        UUID userId,
+        UUID messageId,
 
-        UUID productId,
+        @NotNull
+        UUID syncBatchId,
+
+        @NotNull
+        UUID userId,
 
         @NotBlank
         String barcode,
@@ -18,8 +22,10 @@ public record ProductCreatedEventDTO(
         @Min(0)
         int shelfOfOrigin,
 
+        @NotBlank
         String storeSegment,
 
+        @Min(0)
         int amountCounted
 ) {
 }

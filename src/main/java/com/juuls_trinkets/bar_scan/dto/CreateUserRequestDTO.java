@@ -7,24 +7,13 @@ import jakarta.validation.constraints.Size;
 
 public class CreateUserRequestDTO {
 
-    @NotBlank
-    private String username;
-
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "Password is required.")
+    @Size(min = 8, message = "Password must be at least 8 characters.")
     private String password;
 
     private UUID shopId;
 
     private String role;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getPassword() {
         return password;

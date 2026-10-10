@@ -1,6 +1,8 @@
 package com.juuls_trinkets.bar_scan.exception;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -38,7 +40,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidation(MethodArgumentNotValidException ex) {
-        return Map.of("message", "Request validation failed");
+    public Map<String, Object> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> fields = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        fieldError -> fieldError.getField(),
+                        fieldError -> fieldError.getDefaultMessage() == null
+                                ? "Invalid value."
+                                : fieldError.getDefaultMessage(),
+                        (first, ignored) -> first,
+                        LinkedHashMap::new
+                ));
+
+        String message = fields.isEmpty()
+                ? "Request validation failed."
+                : String.join(" ", fields.values());
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", message);
+        response.put("fields", fields);
+        return response;
     }
 }
