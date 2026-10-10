@@ -14,6 +14,7 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 COPY --from=builder /app/target/bar-scan-0.0.1-SNAPSHOT.jar app.jar
+COPY keystore.p12 keystore.p12
 
 EXPOSE 8080
 
