@@ -47,7 +47,7 @@ public class UserAccessPolicy {
         return switch (role) {
             case ROLE_USER -> "Mobile user";
             case ROLE_DATA_ANALYST -> "Data analyst";
-            case ROLE_ADMIN -> "Shop admin";
+            case ROLE_ADMIN -> "Company admin";
             case ROLE_MANAGER -> "Company manager";
             case ROLE_SUPER_ADMIN -> "System administrator";
             default -> "Unknown user type";
@@ -73,7 +73,7 @@ public class UserAccessPolicy {
     }
 
     public boolean canAssignShopAndRole(String role) {
-        return ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+        return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
     }
 
     public boolean requiresShop(String role) {
@@ -92,7 +92,7 @@ public class UserAccessPolicy {
     }
 
     private boolean canManageShops(String role) {
-        return ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+        return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
     }
 
     private boolean canManageUsers(String role) {
