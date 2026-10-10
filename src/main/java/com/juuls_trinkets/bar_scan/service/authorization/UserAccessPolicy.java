@@ -14,9 +14,12 @@ public class UserAccessPolicy {
     private static final String ROLE_SUPER_ADMIN = "ROLE_SUPER_ADMIN";
     private static final String ROLE_MANAGER = "ROLE_MANAGER";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String ROLE_DATA_ANALYST = "ROLE_DATA_ANALYST";
     private static final String ROLE_USER = "ROLE_USER";
     private static final String OPTION_COMPANY_MANAGER = "company_manager";
     private static final String OPTION_SHOP_ADMIN = "shop_admin";
+    private static final String OPTION_MOBILE_USER = "mobile_user";
+    private static final String OPTION_DATA_ANALYST = "data_analyst";
     private static final String OPTION_SCANNER_USER = "scanner_user";
 
     public AuthCapabilitiesDTO capabilities(String role) {
@@ -35,19 +38,19 @@ public class UserAccessPolicy {
         }
 
         return List.of(
-                roleOption(OPTION_SCANNER_USER, ROLE_USER),
-                roleOption(OPTION_SHOP_ADMIN, ROLE_ADMIN),
-                roleOption(OPTION_COMPANY_MANAGER, ROLE_MANAGER)
+                roleOption(OPTION_MOBILE_USER, ROLE_USER),
+                roleOption(OPTION_DATA_ANALYST, ROLE_DATA_ANALYST)
         );
     }
 
     public String roleLabel(String role) {
         return switch (role) {
-            case ROLE_USER -> "Scannerbruger";
-            case ROLE_ADMIN -> "Butiksadmin";
-            case ROLE_MANAGER -> "Virksomhedsansvarlig";
-            case ROLE_SUPER_ADMIN -> "Systemadministrator";
-            default -> "Ukendt rolle";
+            case ROLE_USER -> "Mobile user";
+            case ROLE_DATA_ANALYST -> "Data analyst";
+            case ROLE_ADMIN -> "Shop admin";
+            case ROLE_MANAGER -> "Company manager";
+            case ROLE_SUPER_ADMIN -> "System administrator";
+            default -> "Unknown user type";
         };
     }
 
@@ -56,10 +59,11 @@ public class UserAccessPolicy {
             return ROLE_USER;
         }
         return switch (role) {
-            case OPTION_SCANNER_USER -> ROLE_USER;
+            case OPTION_MOBILE_USER, OPTION_SCANNER_USER -> ROLE_USER;
+            case OPTION_DATA_ANALYST -> ROLE_DATA_ANALYST;
             case OPTION_SHOP_ADMIN -> ROLE_ADMIN;
             case OPTION_COMPANY_MANAGER -> ROLE_MANAGER;
-            case ROLE_USER, ROLE_ADMIN, ROLE_MANAGER -> role;
+            case ROLE_USER, ROLE_DATA_ANALYST, ROLE_ADMIN, ROLE_MANAGER -> role;
             default -> throw new BadRequestException("Unsupported user role");
         };
     }
@@ -81,7 +85,10 @@ public class UserAccessPolicy {
     }
 
     private boolean canUseWebData(String role) {
-        return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+        return ROLE_DATA_ANALYST.equals(role)
+                || ROLE_ADMIN.equals(role)
+                || ROLE_MANAGER.equals(role)
+                || ROLE_SUPER_ADMIN.equals(role);
     }
 
     private boolean canManageShops(String role) {

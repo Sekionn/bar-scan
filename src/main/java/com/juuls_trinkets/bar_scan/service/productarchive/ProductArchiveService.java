@@ -185,7 +185,7 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
 
     private boolean canSeeCompanyData(CustomUserDetails user) {
         String role = user.getAuthorities().iterator().next().getAuthority();
-        return "ROLE_MANAGER".equals(role) || "ROLE_SUPER_ADMIN".equals(role);
+        return "ROLE_DATA_ANALYST".equals(role) || "ROLE_MANAGER".equals(role) || "ROLE_SUPER_ADMIN".equals(role);
     }
 
     private String toCsv(List<ProductArchiveItemResponseDTO> products) {
