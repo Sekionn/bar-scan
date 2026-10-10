@@ -1,51 +1,45 @@
 package com.juuls_trinkets.bar_scan.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
 import com.juuls_trinkets.bar_scan.dto.ContactSignupRequestDTO;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class SignupNotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(SignupNotificationService.class);
-    private static final String RESEND_MODE = "resend";
-    private static final String RESEND_EMAILS_URL = "https://api.resend.com/emails";
 
-    private final RestClient restClient;
+    private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final String superAdminEmail;
-    private final String notificationMode;
-    private final String resendApiKey;
-    private final String resendFromEmail;
-    private final String resendToEmail;
+    private final String fromEmail;
+    private final String toEmail;
 
     public SignupNotificationService(
-            RestClient.Builder restClientBuilder,
+            ObjectProvider<JavaMailSender> mailSenderProvider,
             @Value("${app.super-admin.email:}") String superAdminEmail,
-            @Value("${app.signup.notification-mode:log}") String notificationMode,
-            @Value("${app.signup.resend.api-key:}") String resendApiKey,
-            @Value("${app.signup.resend.from:}") String resendFromEmail,
-            @Value("${app.signup.resend.to:}") String resendToEmail
+            @Value("${app.signup.email.from:support.bar-scan@juuls-trinkets.com}") String fromEmail,
+            @Value("${app.signup.email.to:support.bar-scan@juuls-trinkets.com}") String toEmail
     ) {
-        this.restClient = restClientBuilder.build();
+        this.mailSenderProvider = mailSenderProvider;
         this.superAdminEmail = superAdminEmail;
-        this.notificationMode = notificationMode;
-        this.resendApiKey = resendApiKey;
-        this.resendFromEmail = resendFromEmail;
-        this.resendToEmail = resendToEmail;
+        this.fromEmail = fromEmail;
+        this.toEmail = toEmail;
     }
 
     public void notifyContactSignup(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
-        if (RESEND_MODE.equalsIgnoreCase(notificationMode)) {
-            sendResendNotification(signupId, request, adminEmail);
-        }
+        sendSmtpNotification(signupId, request, adminEmail);
 
         logger.info(
                 "Contact signup requested: company={}, location={}, allowedUserCount={}, adminEmail={}, message={}",
@@ -57,42 +51,41 @@ public class SignupNotificationService {
         );
     }
 
-    private void sendResendNotification(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
+    private void sendSmtpNotification(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         String recipientEmail = resolvedRecipientEmail();
 
-        if (resendApiKey.isBlank() || resendFromEmail.isBlank() || recipientEmail.isBlank()) {
-            logger.warn("Signup notification email skipped because Resend configuration is incomplete");
+        if (mailSender == null || fromEmail.isBlank() || recipientEmail.isBlank()) {
+            logger.warn("Signup notification email skipped because SMTP configuration is incomplete");
             return;
         }
 
         try {
-            restClient.post()
-                    .uri(RESEND_EMAILS_URL)
-                    .header("Authorization", "Bearer " + resendApiKey)
-                    .body(new ResendEmailRequest(
-                            resendFromEmail,
-                            List.of(recipientEmail),
-                            "New Bar Scan signup request",
-                            buildPlainTextBody(signupId, request, adminEmail),
-                            buildHtmlBody(signupId, request, adminEmail)
-                    ))
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (RestClientException ex) {
-            logger.warn("Signup notification email could not be sent through Resend", ex);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(recipientEmail);
+            helper.setSubject("New Bar'scan signup request");
+            helper.setText(
+                    buildPlainTextBody(signupId, request, adminEmail),
+                    buildHtmlBody(signupId, request, adminEmail)
+            );
+            mailSender.send(message);
+        } catch (MailException | MessagingException ex) {
+            logger.warn("Signup notification email could not be sent through SMTP", ex);
         }
     }
 
     private String resolvedRecipientEmail() {
-        if (!resendToEmail.isBlank()) {
-            return resendToEmail;
+        if (!toEmail.isBlank()) {
+            return toEmail;
         }
         return superAdminEmail;
     }
 
     private static String buildPlainTextBody(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
         return """
-                New company signup request
+                New Bar'scan company signup request
 
                 Signup ID: %s
                 Company: %s
@@ -112,7 +105,7 @@ public class SignupNotificationService {
 
     private static String buildHtmlBody(UUID signupId, ContactSignupRequestDTO request, String adminEmail) {
         return """
-                <h2>New company signup request</h2>
+                <h2>New Bar&#39;scan company signup request</h2>
                 <dl>
                   <dt>Signup ID</dt><dd>%s</dd>
                   <dt>Company</dt><dd>%s</dd>
@@ -147,12 +140,4 @@ public class SignupNotificationService {
                 .replace("'", "&#39;");
     }
 
-    private record ResendEmailRequest(
-            String from,
-            List<String> to,
-            String subject,
-            String text,
-            String html
-    ) {
-    }
 }
