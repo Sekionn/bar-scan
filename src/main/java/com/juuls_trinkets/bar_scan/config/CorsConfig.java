@@ -30,6 +30,7 @@ public class CorsConfig {
                 "https://10.0.2.2:[*]",
                 "http://192.168.1.20:[*]",
                 "https://192.168.1.20:[*]",
+                "https://bar-scan.juuls-trinkets.com",
                 "capacitor://localhost",
                 "ionic://localhost"
         ));
