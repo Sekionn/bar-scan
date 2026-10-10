@@ -66,7 +66,7 @@ public class QueueStatusService implements QueueStatusApplicationService {
     @Override
     public List<QueueStatusResponseDTO> getVisibleStatuses(CustomUserDetails user) {
         String role = user.getAuthorities().iterator().next().getAuthority();
-        if (userAccessPolicy.canAssignShopAndRole(role)) {
+        if (userAccessPolicy.canViewShops(role)) {
             return queueStatusRepository.findStatuses(user.getCompanyId());
         }
         return List.of(queueStatusRepository.findStatus(user.getCompanyId(), requireShop(user.getShopId())));
@@ -91,7 +91,7 @@ public class QueueStatusService implements QueueStatusApplicationService {
 
     private UUID resolveReadableShopId(CustomUserDetails user, UUID requestedShopId) {
         String role = user.getAuthorities().iterator().next().getAuthority();
-        if (userAccessPolicy.canAssignShopAndRole(role)) {
+        if (userAccessPolicy.canViewShops(role)) {
             if (requestedShopId == null) {
                 throw new BadRequestException("shopId is required");
             }

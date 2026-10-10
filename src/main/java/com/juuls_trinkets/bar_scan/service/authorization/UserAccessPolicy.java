@@ -78,6 +78,10 @@ public class UserAccessPolicy {
         return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
     }
 
+    public boolean canViewShops(String role) {
+        return ROLE_DATA_ANALYST.equals(role) || canManageShops(role);
+    }
+
     public boolean requiresShop(String role) {
         return ROLE_USER.equals(role);
     }
@@ -95,10 +99,6 @@ public class UserAccessPolicy {
 
     private boolean canManageShops(String role) {
         return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
-    }
-
-    private boolean canViewShops(String role) {
-        return ROLE_DATA_ANALYST.equals(role) || canManageShops(role);
     }
 
     private boolean canManageUsers(String role) {
