@@ -49,12 +49,12 @@ public class UserService implements UserApplicationService {
     @Override
     public List<UserResponseDTO> findVisibleUsers(CustomUserDetails user) {
         String role = user.getAuthorities().iterator().next().getAuthority();
-        if (userAccessPolicy.canAssignShopAndRole(role)) {
+        if (userAccessPolicy.canViewVisibleUsers(role)) {
             return userRepository.findAllByCompanyId(user.getCompanyId()).stream()
                     .map(visibleUser -> new UserResponseDTO(visibleUser, userAccessPolicy))
                     .toList();
         }
-        throw new BadRequestException("This user cannot manage users");
+        throw new BadRequestException("This user cannot view users");
     }
 
     @Override

@@ -25,7 +25,9 @@ public class UserAccessPolicy {
     public AuthCapabilitiesDTO capabilities(String role) {
         return new AuthCapabilitiesDTO(
                 canUseWebData(role),
+                canViewShops(role),
                 canManageShops(role),
+                canViewUsers(role),
                 canManageUsers(role),
                 canAccessSuperUserPassword(role),
                 canAssignShopAndRole(role)
@@ -69,7 +71,7 @@ public class UserAccessPolicy {
     }
 
     public boolean canViewVisibleUsers(String role) {
-        return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+        return canViewUsers(role);
     }
 
     public boolean canAssignShopAndRole(String role) {
@@ -95,8 +97,16 @@ public class UserAccessPolicy {
         return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
     }
 
+    private boolean canViewShops(String role) {
+        return ROLE_DATA_ANALYST.equals(role) || canManageShops(role);
+    }
+
     private boolean canManageUsers(String role) {
-        return canViewVisibleUsers(role);
+        return ROLE_ADMIN.equals(role) || ROLE_MANAGER.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+    }
+
+    private boolean canViewUsers(String role) {
+        return ROLE_DATA_ANALYST.equals(role) || canManageUsers(role);
     }
 
     private boolean canAccessSuperUserPassword(String role) {

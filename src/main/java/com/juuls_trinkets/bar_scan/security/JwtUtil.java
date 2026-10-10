@@ -68,7 +68,9 @@ public class JwtUtil {
         AuthCapabilitiesDTO capabilities = userAccessPolicy.capabilities(role);
         return Map.of(
                 "canUseWebData", capabilities.canUseWebData(),
+                "canViewShops", capabilities.canViewShops(),
                 "canManageShops", capabilities.canManageShops(),
+                "canViewUsers", capabilities.canViewUsers(),
                 "canManageUsers", capabilities.canManageUsers(),
                 "canAccessSuperUserPassword", capabilities.canAccessSuperUserPassword(),
                 "canAssignShopAndRole", capabilities.canAssignShopAndRole()
