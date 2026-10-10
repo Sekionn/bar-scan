@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.juuls_trinkets.bar_scan.dto.CreateUserRequestDTO;
+import com.juuls_trinkets.bar_scan.dto.SetUserPasswordRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.UserResponseDTO;
 import com.juuls_trinkets.bar_scan.exception.BadRequestException;
 import com.juuls_trinkets.bar_scan.exception.DuplicateResourceException;
@@ -115,6 +116,54 @@ public class UserService implements UserApplicationService {
                 role
         );
         return new UserResponseDTO(userRepository.create(user), userAccessPolicy);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO setUserPassword(UUID userId, SetUserPasswordRequestDTO request, CustomUserDetails actor) {
+        AppUser targetUser = requireManageableTargetUser(userId, actor);
+        return new UserResponseDTO(
+                userRepository.updatePassword(targetUser.getId(), passwordEncoder.encode(request.getPassword())),
+                userAccessPolicy
+        );
+    }
+
+    @Override
+    @Transactional
+    public void removeUser(UUID userId, CustomUserDetails actor) {
+        AppUser targetUser = requireManageableTargetUser(userId, actor);
+        userRepository.deactivate(targetUser.getId());
+    }
+
+    private AppUser requireManageableTargetUser(UUID userId, CustomUserDetails actor) {
+        if (actor.getId().equals(userId)) {
+            throw new BadRequestException("You cannot manage your own account from this page");
+        }
+
+        AppUser targetUser = userRepository.findById(userId)
+                .filter(AppUser::isActive)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        String actorRole = actor.getAuthorities().iterator().next().getAuthority();
+        if (userAccessPolicy.canAssignShopAndRole(actorRole)) {
+            if (!actor.getCompanyId().equals(targetUser.getCompanyId())) {
+                throw new ResourceNotFoundException("User not found");
+            }
+            return targetUser;
+        }
+
+        if ("ROLE_ADMIN".equals(actorRole)) {
+            UUID actorShopId = actor.getShopId();
+            if (actorShopId == null) {
+                throw new ResourceNotFoundException("Admin user is not assigned to a shop");
+            }
+            if (!actorShopId.equals(targetUser.getShopId())) {
+                throw new ResourceNotFoundException("User not found");
+            }
+            return targetUser;
+        }
+
+        throw new BadRequestException("This user cannot manage users");
     }
 
     private String generateUsername(Company company, UUID shopId) {

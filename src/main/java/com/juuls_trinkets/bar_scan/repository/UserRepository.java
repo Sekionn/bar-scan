@@ -23,4 +23,6 @@ public interface UserRepository {
     AppUser create(AppUser user);
 
     AppUser updatePassword(UUID userId, String passwordHash);
+
+    void deactivate(UUID userId);
 }

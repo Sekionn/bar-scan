@@ -35,7 +35,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public Optional<AppUser> findByUsername(String username) {
         List<AppUser> users = template.query(
-                "select * from users where username = :username",
+                "select * from users where username = :username and active = true",
                 Map.of("username", username),
                 new AppUserMapper()
         );
@@ -49,6 +49,7 @@ public class JdbcUserRepository implements UserRepository {
                 select *
                 from users
                 where company_id = :companyId
+                  and active = true
                 order by shop_id is null, shop_id, username
                 """,
                 Map.of("companyId", companyId.toString()),
@@ -63,6 +64,7 @@ public class JdbcUserRepository implements UserRepository {
                 select *
                 from users
                 where shop_id = :shopId
+                  and active = true
                 order by username
                 """,
                 Map.of("shopId", shopId.toString()),
@@ -73,7 +75,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public long countByCompanyId(UUID companyId) {
         Long count = template.queryForObject(
-                "select count(*) from users where company_id = :companyId",
+                "select count(*) from users where company_id = :companyId and active = true",
                 Map.of("companyId", companyId.toString()),
                 Long.class
         );
@@ -108,17 +110,37 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public AppUser updatePassword(UUID userId, String passwordHash) {
-        template.update(
+        int updated = template.update(
                 """
                 update users
                 set password_hash = :passwordHash
                 where id = :id
+                  and active = true
                 """,
                 Map.of(
                         "id", userId.toString(),
                         "passwordHash", passwordHash
                 )
         );
+        if (updated == 0) {
+            throw new ResourceNotFoundException("User not found");
+        }
         return findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    @Override
+    public void deactivate(UUID userId) {
+        int updated = template.update(
+                """
+                update users
+                set active = false
+                where id = :id
+                  and active = true
+                """,
+                Map.of("id", userId.toString())
+        );
+        if (updated == 0) {
+            throw new ResourceNotFoundException("User not found");
+        }
     }
 }
