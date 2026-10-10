@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.juuls_trinkets.bar_scan.exception.ResourceNotFoundException;
 import com.juuls_trinkets.bar_scan.model.Shop;
 
 @Repository
@@ -22,12 +23,13 @@ public class JdbcShopRepository implements ShopRepository {
     @Override
     public List<Shop> findAllByCompanyId(UUID companyId) {
         return template.query(
-                "select * from shops where company_id = :companyId order by name",
+                "select * from shops where company_id = :companyId and active = true order by name",
                 Map.of("companyId", companyId.toString()),
                 (result, rowNumber) -> new Shop(
                         UUID.fromString(result.getString("id")),
                         UUID.fromString(result.getString("company_id")),
-                        result.getString("name")
+                        result.getString("name"),
+                        result.getBoolean("active")
                 )
         );
     }
@@ -35,12 +37,13 @@ public class JdbcShopRepository implements ShopRepository {
     @Override
     public Optional<Shop> findById(UUID id) {
         List<Shop> shops = template.query(
-                "select * from shops where id = :id",
+                "select * from shops where id = :id and active = true",
                 Map.of("id", id.toString()),
                 (result, rowNumber) -> new Shop(
                         UUID.fromString(result.getString("id")),
                         UUID.fromString(result.getString("company_id")),
-                        result.getString("name")
+                        result.getString("name"),
+                        result.getBoolean("active")
                 )
         );
         return shops.stream().findFirst();
@@ -60,5 +63,21 @@ public class JdbcShopRepository implements ShopRepository {
                 )
         );
         return shop;
+    }
+
+    @Override
+    public void deactivate(UUID id) {
+        int updated = template.update(
+                """
+                update shops
+                set active = false
+                where id = :id
+                  and active = true
+                """,
+                Map.of("id", id.toString())
+        );
+        if (updated == 0) {
+            throw new ResourceNotFoundException("Shop not found");
+        }
     }
 }

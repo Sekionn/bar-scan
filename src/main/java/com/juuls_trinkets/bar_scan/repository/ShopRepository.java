@@ -13,4 +13,6 @@ public interface ShopRepository {
     Optional<Shop> findById(UUID id);
 
     Shop create(Shop shop);
+
+    void deactivate(UUID id);
 }

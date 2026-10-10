@@ -1,6 +1,7 @@
 package com.juuls_trinkets.bar_scan.service.shop;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.juuls_trinkets.bar_scan.dto.CreateShopRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.ShopResponseDTO;
@@ -11,4 +12,6 @@ public interface ShopApplicationService {
     List<ShopResponseDTO> findShops(CustomUserDetails user);
 
     ShopResponseDTO createShop(CustomUserDetails user, CreateShopRequestDTO request);
+
+    void removeShop(CustomUserDetails user, UUID shopId);
 }

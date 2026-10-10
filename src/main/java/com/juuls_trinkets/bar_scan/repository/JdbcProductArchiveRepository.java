@@ -38,6 +38,7 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
                 join scanning_sessions s on s.id = sp.scanning_session_id
                 join shops sh on sh.id = s.shop_id
                 where s.company_id = :companyId
+                  and sh.active = true
                 """ + shopFilter + """
 
                 group by s.shop_id, sh.name, counted_year, counted_quarter, counted_day
@@ -158,6 +159,7 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
         return """
                 s.company_id = :companyId
                   and s.shop_id = :shopId
+                  and sh.active = true
                   and (
                     (:date is not null and date(sp.counted_date) = :date)
                     or (

@@ -143,4 +143,17 @@ public class JdbcUserRepository implements UserRepository {
             throw new ResourceNotFoundException("User not found");
         }
     }
+
+    @Override
+    public void deactivateByShopId(UUID shopId) {
+        template.update(
+                """
+                update users
+                set active = false
+                where shop_id = :shopId
+                  and active = true
+                """,
+                Map.of("shopId", shopId.toString())
+        );
+    }
 }

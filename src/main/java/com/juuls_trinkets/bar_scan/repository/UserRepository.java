@@ -25,4 +25,6 @@ public interface UserRepository {
     AppUser updatePassword(UUID userId, String passwordHash);
 
     void deactivate(UUID userId);
+
+    void deactivateByShopId(UUID shopId);
 }
