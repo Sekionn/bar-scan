@@ -29,4 +29,11 @@ class UserAccessPolicyTests {
 
         assertThat(capabilities.canUseWebData()).isFalse();
     }
+
+    @Test
+    void onlyMobileUsersCanUseMobileScanning() {
+        assertThat(userAccessPolicy.canUseMobileScanning("ROLE_USER")).isTrue();
+        assertThat(userAccessPolicy.canUseMobileScanning("ROLE_ADMIN")).isFalse();
+        assertThat(userAccessPolicy.canUseMobileScanning("ROLE_DATA_ANALYST")).isFalse();
+    }
 }

@@ -11,14 +11,13 @@ public interface ProductArchiveRepository {
 
     List<ProductArchiveSummaryRow> findSummary(UUID companyId, UUID shopId);
 
-    long countProducts(UUID companyId, UUID shopId, Integer year, String quarter, LocalDate date);
+    long countProducts(UUID companyId, UUID shopId, LocalDate startDate, LocalDate endDate);
 
     List<ProductArchiveItemResponseDTO> findProducts(
             UUID companyId,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             int limit,
             int offset
     );
@@ -26,8 +25,7 @@ public interface ProductArchiveRepository {
     List<ProductArchiveItemResponseDTO> findProductsForExport(
             UUID companyId,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date
+            LocalDate startDate,
+            LocalDate endDate
     );
 }

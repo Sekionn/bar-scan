@@ -57,7 +57,7 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
     }
 
     @Override
-    public long countProducts(UUID companyId, UUID shopId, Integer year, String quarter, LocalDate date) {
+    public long countProducts(UUID companyId, UUID shopId, LocalDate startDate, LocalDate endDate) {
         Long count = template.queryForObject(
                 """
                 select count(*)
@@ -72,7 +72,7 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
                     group by s.shop_id, sh.name, sp.barcode, sp.shelf_of_origin, sp.store_segment, date(sp.counted_date)
                 ) grouped_products
                 """,
-                filterParameters(companyId, shopId, year, quarter, date),
+                filterParameters(companyId, shopId, startDate, endDate),
                 Long.class
         );
         return count == null ? 0 : count;
@@ -82,13 +82,12 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
     public List<ProductArchiveItemResponseDTO> findProducts(
             UUID companyId,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             int limit,
             int offset
     ) {
-        MapSqlParameterSource parameters = filterParameters(companyId, shopId, year, quarter, date)
+        MapSqlParameterSource parameters = filterParameters(companyId, shopId, startDate, endDate)
                 .addValue("limit", limit)
                 .addValue("offset", offset);
         return template.query(
@@ -102,13 +101,12 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
     public List<ProductArchiveItemResponseDTO> findProductsForExport(
             UUID companyId,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date
+            LocalDate startDate,
+            LocalDate endDate
     ) {
         return template.query(
                 productsQuery(""),
-                filterParameters(companyId, shopId, year, quarter, date),
+                filterParameters(companyId, shopId, startDate, endDate),
                 this::mapArchiveItem
         );
     }
@@ -160,16 +158,7 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
                 s.company_id = :companyId
                   and s.shop_id = :shopId
                   and sh.active = true
-                  and (
-                    (:date is not null and date(sp.counted_date) = :date)
-                    or (
-                      :date is null
-                      and :year is not null
-                      and :quarterNumber is not null
-                      and year(sp.counted_date) = :year
-                      and quarter(sp.counted_date) = :quarterNumber
-                    )
-                  )
+                  and date(sp.counted_date) between :startDate and :endDate
                 """;
     }
 
@@ -182,19 +171,11 @@ public class JdbcProductArchiveRepository implements ProductArchiveRepository {
         return parameters;
     }
 
-    private MapSqlParameterSource filterParameters(UUID companyId, UUID shopId, Integer year, String quarter, LocalDate date) {
+    private MapSqlParameterSource filterParameters(UUID companyId, UUID shopId, LocalDate startDate, LocalDate endDate) {
         return new MapSqlParameterSource()
                 .addValue("companyId", companyId.toString())
                 .addValue("shopId", shopId.toString())
-                .addValue("year", year)
-                .addValue("quarterNumber", quarterNumber(quarter))
-                .addValue("date", date == null ? null : Date.valueOf(date));
-    }
-
-    private Integer quarterNumber(String quarter) {
-        if (quarter == null || quarter.isBlank()) {
-            return null;
-        }
-        return Integer.parseInt(quarter.replace("Q", ""));
+                .addValue("startDate", Date.valueOf(startDate))
+                .addValue("endDate", Date.valueOf(endDate));
     }
 }

@@ -181,12 +181,4 @@ public class SignupPaymentService implements SignupPaymentApplicationService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(notFoundMessage));
     }
-
-    private record SignupRequestRow(
-            UUID id,
-            UUID paymentSessionId,
-            String paymentStatus,
-            String onboardingStatus
-    ) {
-    }
 }

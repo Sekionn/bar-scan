@@ -11,6 +11,7 @@ import com.juuls_trinkets.bar_scan.dto.ProductCreatedEventDTO;
 import com.juuls_trinkets.bar_scan.dto.ProductResponseDTO;
 import com.juuls_trinkets.bar_scan.exception.DuplicateResourceException;
 import com.juuls_trinkets.bar_scan.exception.ResourceNotFoundException;
+import com.juuls_trinkets.bar_scan.exception.UnassignedShopMessageException;
 import com.juuls_trinkets.bar_scan.model.AppUser;
 import com.juuls_trinkets.bar_scan.model.ScanningSession;
 import com.juuls_trinkets.bar_scan.model.ScanningSessionProduct;
@@ -79,7 +80,7 @@ public class ProductService implements ProductApplicationService {
 
     private UUID requireShop(UUID shopId) {
         if (shopId == null) {
-            throw new ResourceNotFoundException("User is not assigned to a shop");
+            throw new UnassignedShopMessageException();
         }
         return shopId;
     }

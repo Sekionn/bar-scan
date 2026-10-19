@@ -2,8 +2,6 @@ package com.juuls_trinkets.bar_scan.service.productarchive;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,28 +48,26 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
     public ProductArchivePageResponseDTO getProducts(
             CustomUserDetails user,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             int page,
             int size
     ) {
         UUID resolvedShopId = resolveReadableShopId(user, shopId);
-        validateSelection(year, quarter, date);
+        validateDateRange(startDate, endDate);
         int normalizedPage = Math.max(1, page);
         int normalizedSize = Math.min(200, Math.max(1, size));
         int offset = (normalizedPage - 1) * normalizedSize;
 
-        long totalElements = productArchiveRepository.countProducts(user.getCompanyId(), resolvedShopId, year, quarter, date);
+        long totalElements = productArchiveRepository.countProducts(user.getCompanyId(), resolvedShopId, startDate, endDate);
         int totalPages = Math.max(1, (int) Math.ceil((double) totalElements / normalizedSize));
 
         return new ProductArchivePageResponseDTO(
                 productArchiveRepository.findProducts(
                         user.getCompanyId(),
                         resolvedShopId,
-                        year,
-                        quarter,
-                        date,
+                        startDate,
+                        endDate,
                         normalizedSize,
                         offset
                 ),
@@ -86,19 +82,17 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
     public String exportProducts(
             CustomUserDetails user,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             String format
     ) {
         UUID resolvedShopId = resolveReadableShopId(user, shopId);
-        validateSelection(year, quarter, date);
+        validateDateRange(startDate, endDate);
         List<ProductArchiveItemResponseDTO> products = productArchiveRepository.findProductsForExport(
                 user.getCompanyId(),
                 resolvedShopId,
-                year,
-                quarter,
-                date
+                startDate,
+                endDate
         );
         String normalizedFormat = format == null ? "csv" : format.toLowerCase();
         return switch (normalizedFormat) {
@@ -164,15 +158,12 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
         return ownShopId;
     }
 
-    private void validateSelection(Integer year, String quarter, LocalDate date) {
-        if (date != null) {
-            return;
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new BadRequestException("Start date and end date are required");
         }
-        if (year == null || quarter == null || quarter.isBlank()) {
-            throw new BadRequestException("Either date or year and quarter are required");
-        }
-        if (!List.of("Q1", "Q2", "Q3", "Q4").contains(quarter)) {
-            throw new BadRequestException("Quarter must be Q1, Q2, Q3, or Q4");
+        if (endDate.isBefore(startDate)) {
+            throw new BadRequestException("End date must be on or after start date");
         }
     }
 
@@ -196,7 +187,7 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
         for (int index = 0; index < products.size(); index++) {
             ProductArchiveItemResponseDTO product = products.get(index);
             builder.append(csv(product.storeSegment())).append(';')
-                    .append(csv(product.barcode())).append(';')
+                    .append(csvText(product.barcode())).append(';')
                     .append(product.amountCounted()).append(';')
                     .append(csv(formatExportDate(product.date()))).append(';')
                     .append(index + 1).append('\n');
@@ -228,76 +219,8 @@ public class ProductArchiveService implements ProductArchiveApplicationService {
         return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
-    private static class ShopBucket {
-        private final UUID shopId;
-        private final String shopName;
-        private final Map<Integer, YearBucket> years = new LinkedHashMap<>();
-        private long productCount;
-
-        private ShopBucket(UUID shopId, String shopName) {
-            this.shopId = shopId;
-            this.shopName = shopName;
-        }
-
-        private ProductArchiveShopResponseDTO toResponse() {
-            return new ProductArchiveShopResponseDTO(
-                    shopId,
-                    shopName,
-                    productCount,
-                    years.values().stream()
-                            .sorted(Comparator.comparing(YearBucket::year).reversed())
-                            .map(YearBucket::toResponse)
-                            .toList()
-            );
-        }
+    private String csvText(String value) {
+        return "=\"" + value.replace("\"", "\"\"") + "\"";
     }
 
-    private static class YearBucket {
-        private final int year;
-        private final Map<String, QuarterBucket> quarters = new LinkedHashMap<>();
-        private long productCount;
-
-        private YearBucket(int year) {
-            this.year = year;
-        }
-
-        private int year() {
-            return year;
-        }
-
-        private ProductArchiveYearResponseDTO toResponse() {
-            return new ProductArchiveYearResponseDTO(
-                    year,
-                    productCount,
-                    quarters.values().stream()
-                            .sorted(Comparator.comparing(QuarterBucket::quarterNumber))
-                            .map(QuarterBucket::toResponse)
-                            .toList()
-            );
-        }
-    }
-
-    private static class QuarterBucket {
-        private final String quarter;
-        private final List<ProductArchiveDateResponseDTO> dates = new ArrayList<>();
-        private long productCount;
-
-        private QuarterBucket(String quarter) {
-            this.quarter = quarter;
-        }
-
-        private int quarterNumber() {
-            return Integer.parseInt(quarter.replace("Q", ""));
-        }
-
-        private ProductArchiveQuarterResponseDTO toResponse() {
-            return new ProductArchiveQuarterResponseDTO(
-                    quarter,
-                    productCount,
-                    dates.stream()
-                            .sorted(Comparator.comparing(ProductArchiveDateResponseDTO::date).reversed())
-                            .toList()
-            );
-        }
-    }
 }

@@ -163,17 +163,4 @@ public class CompanyOnboardingService implements CompanyOnboardingApplicationSer
     private static UUID nullableUuid(String value) {
         return value == null ? null : UUID.fromString(value);
     }
-
-    private record SignupRequestRow(
-            UUID id,
-            String companyName,
-            int allowedUserCount,
-            String adminEmail,
-            String adminPasswordHash,
-            String paymentStatus,
-            String onboardingStatus,
-            UUID onboardedCompanyId,
-            UUID onboardedAdminUserId
-    ) {
-    }
 }

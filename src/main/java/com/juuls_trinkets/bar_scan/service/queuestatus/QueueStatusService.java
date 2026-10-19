@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.juuls_trinkets.bar_scan.dto.QueueStatusResponseDTO;
 import com.juuls_trinkets.bar_scan.exception.BadRequestException;
 import com.juuls_trinkets.bar_scan.exception.ResourceNotFoundException;
+import com.juuls_trinkets.bar_scan.exception.UnassignedShopMessageException;
 import com.juuls_trinkets.bar_scan.model.AppUser;
 import com.juuls_trinkets.bar_scan.model.Shop;
 import com.juuls_trinkets.bar_scan.repository.QueueStatusRepository;
@@ -41,7 +42,7 @@ public class QueueStatusService implements QueueStatusApplicationService {
     @Override
     public void registerExpectedMessages(UUID userId, UUID syncBatchId, List<UUID> messageIds) {
         AppUser user = findUser(userId);
-        UUID shopId = requireShop(user.getShopId());
+        UUID shopId = requireShopForMessage(user.getShopId());
         messageIds.stream()
                 .distinct()
                 .forEach(messageId -> queueStatusRepository.registerExpected(messageId, syncBatchId, user.getCompanyId(), shopId));
@@ -51,7 +52,7 @@ public class QueueStatusService implements QueueStatusApplicationService {
     @Override
     public void cancelUnpublishedMessages(UUID userId, UUID syncBatchId, List<UUID> messageIds) {
         AppUser user = findUser(userId);
-        UUID shopId = requireShop(user.getShopId());
+        UUID shopId = requireShopForMessage(user.getShopId());
         messageIds.stream()
                 .distinct()
                 .forEach(messageId -> queueStatusRepository.cancelUnpublished(messageId, syncBatchId, user.getCompanyId(), shopId));
@@ -111,6 +112,13 @@ public class QueueStatusService implements QueueStatusApplicationService {
     private UUID requireShop(UUID shopId) {
         if (shopId == null) {
             throw new ResourceNotFoundException("User is not assigned to a shop");
+        }
+        return shopId;
+    }
+
+    private UUID requireShopForMessage(UUID shopId) {
+        if (shopId == null) {
+            throw new UnassignedShopMessageException();
         }
         return shopId;
     }

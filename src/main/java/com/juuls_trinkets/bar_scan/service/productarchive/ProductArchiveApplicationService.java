@@ -14,9 +14,8 @@ public interface ProductArchiveApplicationService {
     ProductArchivePageResponseDTO getProducts(
             CustomUserDetails user,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             int page,
             int size
     );
@@ -24,9 +23,8 @@ public interface ProductArchiveApplicationService {
     String exportProducts(
             CustomUserDetails user,
             UUID shopId,
-            Integer year,
-            String quarter,
-            LocalDate date,
+            LocalDate startDate,
+            LocalDate endDate,
             String format
     );
 }

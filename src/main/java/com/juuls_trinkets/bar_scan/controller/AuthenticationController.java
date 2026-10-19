@@ -24,6 +24,7 @@ import com.juuls_trinkets.bar_scan.dto.CreateUserRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.LoginRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.SetUserPasswordRequestDTO;
 import com.juuls_trinkets.bar_scan.dto.UserResponseDTO;
+import com.juuls_trinkets.bar_scan.exception.BadRequestException;
 import com.juuls_trinkets.bar_scan.exception.ForbiddenException;
 import com.juuls_trinkets.bar_scan.security.CustomUserDetails;
 import com.juuls_trinkets.bar_scan.security.JwtUtil;
@@ -89,10 +90,19 @@ public class AuthenticationController {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+        String clientType = request.getClientType();
 
-        if (LoginRequestDTO.CLIENT_TYPE_WEB.equals(request.getClientType())
+        if (!LoginRequestDTO.CLIENT_TYPE_MOBILE.equals(clientType)
+                && !LoginRequestDTO.CLIENT_TYPE_WEB.equals(clientType)) {
+            throw new BadRequestException("Unsupported client type.");
+        }
+        if (LoginRequestDTO.CLIENT_TYPE_WEB.equals(clientType)
                 && !userAccessPolicy.canUseWebData(user.getRole())) {
             throw new ForbiddenException("This user can only log in to the mobile app.");
+        }
+        if (LoginRequestDTO.CLIENT_TYPE_MOBILE.equals(clientType)
+                && !userAccessPolicy.canUseMobileScanning(user.getRole())) {
+            throw new ForbiddenException("This user does not have access to the mobile app.");
         }
 
         return new AuthTokenResponseDTO(jwtUtil.generateToken((UserDetails) user));

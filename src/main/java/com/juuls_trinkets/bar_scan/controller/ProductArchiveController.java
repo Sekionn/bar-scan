@@ -38,22 +38,20 @@ public class ProductArchiveController {
     public ProductArchivePageResponseDTO getProducts(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestParam UUID shopId,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String quarter,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "50") int size
     ) {
-        return productArchiveService.getProducts(user, shopId, year, quarter, date, page, size);
+        return productArchiveService.getProducts(user, shopId, startDate, endDate, page, size);
     }
 
     @GetMapping("/export")
     public ResponseEntity<String> exportProducts(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestParam UUID shopId,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String quarter,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String accept
     ) {
         String format = exportFormat(accept);
@@ -63,7 +61,7 @@ public class ProductArchiveController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"bar-scan-products." + format + "\"")
                 .contentType(contentType)
-                .body(productArchiveService.exportProducts(user, shopId, year, quarter, date, format));
+                .body(productArchiveService.exportProducts(user, shopId, startDate, endDate, format));
     }
 
     private String exportFormat(String accept) {

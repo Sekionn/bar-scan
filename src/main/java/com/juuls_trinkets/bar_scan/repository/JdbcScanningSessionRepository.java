@@ -121,39 +121,4 @@ public class JdbcScanningSessionRepository implements ScanningSessionRepository 
                 .addValue("startedAt", session.getStartedAt())
                 .addValue("closedAt", session.getClosedAt());
     }
-
-    private static class ScanningSessionMapper implements RowMapper<ScanningSession> {
-
-        @Override
-        public ScanningSession mapRow(ResultSet result, int rowNumber) throws SQLException {
-            return new ScanningSession(
-                    UUID.fromString(result.getString("id")),
-                    UUID.fromString(result.getString("company_id")),
-                    UUID.fromString(result.getString("shop_id")),
-                    UUID.fromString(result.getString("started_by_user_id")),
-                    result.getTimestamp("started_at").toLocalDateTime(),
-                    nullableLocalDateTime(result.getTimestamp("closed_at"))
-            );
-        }
-    }
-
-    private static class ScanningSessionProductMapper implements RowMapper<ScanningSessionProduct> {
-
-        @Override
-        public ScanningSessionProduct mapRow(ResultSet result, int rowNumber) throws SQLException {
-            return new ScanningSessionProduct(
-                    UUID.fromString(result.getString("scanning_session_id")),
-                    UUID.fromString(result.getString("message_id")),
-                    result.getString("barcode"),
-                    result.getInt("shelf_of_origin"),
-                    result.getString("store_segment"),
-                    result.getInt("amount_counted"),
-                    result.getTimestamp("counted_date").toLocalDateTime()
-            );
-        }
-    }
-
-    private static LocalDateTime nullableLocalDateTime(Timestamp timestamp) {
-        return timestamp == null ? null : timestamp.toLocalDateTime();
-    }
 }

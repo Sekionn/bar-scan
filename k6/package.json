@@ -1,0 +1,10 @@
+{
+  "name": "bar-scan-k6",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "queue:products": "k6 run product-created-queue.js",
+    "queue:app-sync": "k6 run app-sync-product-created.js",
+    "queue:reject-unassigned-user": "k6 run reject-unassigned-user-product-created.js"
+  }
+}

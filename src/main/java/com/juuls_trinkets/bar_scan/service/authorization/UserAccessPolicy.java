@@ -86,6 +86,10 @@ public class UserAccessPolicy {
         return ROLE_USER.equals(role);
     }
 
+    public boolean canUseMobileScanning(String role) {
+        return ROLE_USER.equals(role);
+    }
+
     private UserRoleOptionDTO roleOption(String value, String role) {
         return new UserRoleOptionDTO(value, roleLabel(role), requiresShop(role));
     }
