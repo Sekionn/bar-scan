@@ -9,6 +9,7 @@ Monorepo for the Bar Scan backend and integration documentation.
 - `docs/frontend-flow-context.md` - real frontend flow contract.
 - `docs/backend-contact-signup-context.md` - contact-based signup requirements.
 - `docker-compose.yml` - local MySQL and RabbitMQ stack, plus backend.
+- `kubernetes/` - local Kubernetes manifests and deployment guide for the full stack.
 
 ## Hosted Signup Flow
 

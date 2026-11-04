@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bar-scan-backend-config
+  namespace: bar-scan
+data:
+  DB_URL: "jdbc:mysql://mysql:3306/bar_scan?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+  DB_USERNAME: bar_scan
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_PORT: "5672"
+  SERVER_SSL_ENABLED: "false"
+  PAYMENT_PROVIDER: dev
+  PAYMENT_DEV_CHECKOUT_BASE_URL: http://localhost:30080/payments/dev/checkout
+  APP_SUPER_ADMIN_EMAIL: ""
+  APP_BOOTSTRAP_ADMIN_ENABLED: "true"
+  APP_BOOTSTRAP_ADMIN_COMPANY_ID: 00000000-0000-0000-0000-000000000001
+  APP_BOOTSTRAP_ADMIN_COMPANY_NAME: Juuls Trinkets
+  APP_BOOTSTRAP_ADMIN_ALLOWED_USER_COUNT: "10"
+  APP_BOOTSTRAP_ADMIN_LOCATION_NAME: Juuls Trinkets
+  APP_BOOTSTRAP_ADMIN_USER_ID: 00000000-0000-0000-0000-000000000002
+  APP_BOOTSTRAP_ADMIN_USERNAME: admin

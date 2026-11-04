@@ -35,3 +35,4 @@ build/
 ### Local environment ###
 .env
 .env.local
+kubernetes/**/secret.yaml

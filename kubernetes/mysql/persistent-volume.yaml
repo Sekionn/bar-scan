@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bar-scan-mysql-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: bar-scan-local
+  hostPath:
+    path: /var/lib/bar-scan/mysql
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data
+  namespace: bar-scan
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: bar-scan-local
+  resources:
+    requests:
+      storage: 5Gi
